@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KARIMA COK ASIGIM 🤍</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CSS TASARIM BAŞLANGICI --- */
+        :root {
+            --bg-gradient-start: #a16866;
+            --bg-gradient-end: #52115e;
+            --panel-bg: rgba(255, 255, 255, 0.7);
+            --text-primary: #4a148c;
+            --accent-color: #8e24aa;
+            --button-hover: #ede7f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 30px;
+            gap: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239c27b0' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .left-panel {
+            flex: 1;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(74, 20, 140, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .playlist-header {
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        #song-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+
+        .song-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .song-btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+            color: var(--accent-color);
+        }
+
+        .song-btn.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 5px 15px rgba(142, 36, 170, 0.3);
+        }
+
+        .player-wrapper {
+            height: 225px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .right-panel {
+            flex: 1.2;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(74, 20, 140, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+
+        /* Tıklanabilir Kalp İkonu */
+        #heart-icon {
+            position: absolute;
+            top: 20px;
+            right: 485px; /* Sağ üst köşe */
+            font-size: 3.5rem;
+            color: var(--accent-color);
+            opacity: 0.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        #heart-icon:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            text-shadow: 0 0 15px rgba(142, 36, 170, 0.5);
+        }
+
+        #dynamic-quote {
+            font-size: 2.2rem;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.4;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            opacity: 1;
+        }
+        
+        .quote-hidden {
+            opacity: 0 !important;
+            transform: translateY(20px);
+        }
+
+        /* --- AÇILIR EKRAN (MODAL) STİLLERİ --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            max-width: 400px;
+            width: 80%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 2px solid var(--accent-color);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content p {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; height: auto; overflow-y: auto; }
+            body, html { overflow: auto; }
+            .left-panel, .right-panel { flex: none; height: auto; }
+            .right-panel { padding: 30px; min-height: 300px; }
+            #heart-icon { font-size: 2.5rem; top: 10px; right: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="left-panel">
+            <h2 class="playlist-header">Bana Seni Hatırlatan Şarkılar</h2>
+            <div id="song-list-container"></div>
+            <div class="player-wrapper">
+                <iframe id="spotify-iframe" src="" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div id="heart-icon" onclick="openLoveModal()">❤</div>
+            <p id="dynamic-quote">Yükleniyor...</p>
+        </div>
+    </div>
+
+    <div id="love-modal" class="modal-overlay" onclick="closeLoveModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="document.getElementById('love-modal').style.display='none'">&times;</span>
+            <p>İyi ki benimlesin, <br> İyi ki benimsin.<br> Seni çok seviyorum. <br><br> Sevgililer günümüz kutlu olsun guzelim. 🤍💐</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Şarkı Listesi Verileri ---
+        const seninListen = [
+            { id: "4Q2t1wFBSwgaPlgV5GpqZp", title: "1) ♫ Bu Kalp Seni Unutur Mu?", quote: "Bambaşka bir halin vardı,\n Farketmeden beni sardı,\n Benliğimi benden aldı..." },
+            { id: "3naYqiHrwFLitIKYHHJgvo", title: "2) ♫ Dünyanın En Güzel Kızı", quote: "Hem dünyamın\n Hem de dünyanın en güzel kızına." },
+            { id: "40x5K8xyIWVmSeUrYjj0os", title: "3) ♫ Lost on You", quote: "All i ever wanted was you and it will stay like that." },
+            { id: "2q4rjDy9WhaN3o9MvDbO21", title: "4) ♫ Kiss Me Thru The Phone", quote: "Girl, you know I miss you, I just wanna kiss you\nBut I can't right now so baby, kiss me through the phone" },
+            { id: "4tEmDXTjyI9AHnDaFvHnya", title: "5) ♫ Aklımı Kaçırdım", quote: "Aklımı kaçırdım senle güzelim." },
+            { id: "3t0tWO3jsrvHTCl1FsqkZf", title: "6) ♫ Yıldızlara Bak", quote: "Adını kazdığım masum lise sıralarım." },
+            { id: "5jVMm7kpwRAY1kxziLelYz", title: "7) ♫ Yakamoz Güzeli", quote: "Yakamoz, yakamoz güzeli\nBence o endam güzeli" },
+            { id: "0LOyLKALefDw224AMpiznW", title: "8) ♫ Başa Sar", quote: "Anısı var diye." },
+            { id: "2sLAykCWyB1VA5hXDjU59T", title: "9) ♫ Senden Daha Güzel", quote: "Sana ner'den rastladım?\nOldum derbeder,\nKendimi sana sakladım\nSenden daha güzel." },
+            { id: "5japGpeZFIAcIr63wR7Wzc", title: "10) ♫ Bu Kız", quote: "Bu kız beni sever,\nBu kız beni öldürür,\nBu kız bana güzel hayaller gördürür." },
+            { id: "1o8Pavu7zrnYJg3cJoCO8j", title: "11) ♫ Mayıs 3", quote: "Yolları sana çıkmayan bu ankaradan nefret ettim." },
+            { id: "1QOSqQevYx6IrRTV9UG3D9", title: "12) ♫ Belki Üstümüzden Bir Kuş Geçer", quote: "Yorulursan yaslan bana\nSarılıp uyuyalım gün batımında." },
+            { id: "3FoxsQsG5Z9bMuqdF5szJO", title: "13) ♫ Toprak Yağmura", quote: "Bir kadın gelir, değiştirir seni\nAlıştığın o sert, kararlı şeklini." },
+            { id: "7LXZEyI1ke06UnmuwG4P8d", title: "14) ♫ Giderdi Hoşuma", quote: "Ne giyerse giderdi hoşuma,\nÖyle tatlı bela ki başıma..." },
+            { id: "4hmrOLhj3PaEOeyAQt9ow0", title: "15) ♫ Bu Kız Benim Kaderim", quote: "Ama bu kız benim kaderim,\nBen ona boyun eğmeliyim." },
+        ];
+
+        const songListContainer = document.getElementById('song-list-container');
+        const spotifyIframe = document.getElementById('spotify-iframe');
+        const quoteText = document.getElementById('dynamic-quote');
+        let activeBtn = null;
+
+        function changeSong(trackData, clickedBtn) {
+            if (activeBtn) activeBtn.classList.remove('active');
+            clickedBtn.classList.add('active');
+            activeBtn = clickedBtn;
+
+            spotifyIframe.src = `https://open.spotify.com/embed/track/${trackData.id}?utm_source=generator&theme=0`;
+
+            quoteText.classList.add('quote-hidden');
+            setTimeout(() => {
+                quoteText.innerText = trackData.quote;
+                quoteText.classList.remove('quote-hidden');
+            }, 600);
+        }
+
+        function initializePage() {
+            seninListen.forEach((song, index) => {
+                const btn = document.createElement('button');
+                btn.innerText = song.title;
+                btn.classList.add('song-btn');
+                btn.onclick = function() { changeSong(song, this); };
+                songListContainer.appendChild(btn);
+                if (index === 0) btn.click();
+            });
+        }
+
+        // --- MODAL FONKSİYONLARI ---
+        function openLoveModal() {
+            document.getElementById('love-modal').style.display = 'flex';
+        }
+
+        function closeLoveModal(event) {
+            // Sadece arka plana tıklandığında kapatır
+            if(event.target.id === 'love-modal') {
+                document.getElementById('love-modal').style.display = 'none';
+            }
+        }
+
+        initializePage();
+    </script>
+</body>
+</html>
